@@ -1,0 +1,52 @@
+- name: Setup Vue Storefront for Development
+  hosts: localhost
+  become: yes
+  gather_facts: yes
+
+  tasks:
+    - name: Update system packages
+      apt:
+        update_cache: yes
+      when: ansible_os_family == 'Debian'
+
+    - name: Install required system packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - git
+        - curl
+        - wget
+        - nodejs
+        - npm
+        - yarn
+        - redis-server
+        # Add other packages you may need
+
+    - name: Clone the Vue Storefront repository
+      git:
+        repo: https://github.com/vuestorefront/vue-storefront.git
+        dest: /home
+        update: yes
+      # Specify the appropriate repository and destination path
+
+    - name: Change to Vue Storefront directory
+      command: cd /home
+
+    - name: Install Vue Storefront dependencies
+      command: yarn install
+      args:
+        chdir: /home
+
+    - name: Configure Vue Storefront
+      template:
+        src: home/local.json
+        dest: /home/local.json
+      # You may need to provide your own local.json configuration
+
+    - name: Start the development server
+      command: yarn dev
+      args:
+        chdir: /home
+      async: 600
+      poll: 0

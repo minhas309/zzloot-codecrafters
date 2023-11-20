@@ -1,0 +1,4 @@
+---
+- import_playbook: vueStoreFront_playbook.yml
+- import_playbook: metabase_playbook.yml
+- import_playbook: magento_playbook.yml
