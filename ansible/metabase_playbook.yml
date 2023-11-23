@@ -1,0 +1,34 @@
+---
+- name: Deploy Metabase on VMs
+  hosts: metabase_vms  # Replace with the actual group or IP addresses of your Metabase VMs
+  become: true
+
+  tasks:
+    - name: Install Docker on VMs
+      become: true
+      apt:
+        name:
+          - docker.io
+        state: present
+      when: ansible_distribution == 'Ubuntu'  # Adjust for your distribution if needed
+
+    - name: Pull Metabase Docker image
+      docker_image:
+        name: metabase/metabase:latest
+        state: present
+
+    - name: Create Metabase Docker container
+      docker_container:
+        name: metabase
+        image: metabase/metabase:latest
+        state: started
+        restart_policy: always
+        ports:
+          - "3000:3000"
+
+    - name: Wait for Metabase to be responsive
+      wait_for:
+        host: localhost
+        port: 3000
+        delay: 10
+        timeout: 60
